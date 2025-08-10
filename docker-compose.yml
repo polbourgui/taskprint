@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  taskprint-app:
+    build: ./app
+    container_name: taskprint-app
+    restart: unless-stopped
+    volumes:
+      - ./app/public:/app/public
+      - ./data:/app/data
+      - ./app/uploads:/app/uploads
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - TZ=Europe/Paris
+    networks:
+      - taskprint-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  taskprint-nginx:
+    image: nginx:alpine
+    container_name: taskprint-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"  # Si vous configurez HTTPS
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs:/var/log/nginx
+    depends_on:
+      - taskprint-app
+    networks:
+      - taskprint-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  taskprint-network:
+    driver: bridge
+
+volumes:
+  taskprint-data:
+    driver: local
+  taskprint-uploads:
+  taskprint-logs:

@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 TaskPrint - Gestionnaire de Tâches</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .task-form {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .priority-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .priority-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .priority-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .priority-btn.high { border-color: #ff6b6b; }
+        .priority-btn.high.active { background: #ff6b6b; }
+        .priority-btn.medium { border-color: #feca57; }
+        .priority-btn.medium.active { background: #feca57; }
+        .priority-btn.low { border-color: #48dbfb; }
+        .priority-btn.low.active { background: #48dbfb; }
+
+        .upload-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .camera-btn {
+            background: #00b894 !important;
+            color: white !important;
+            border-color: #00b894 !important;
+        }
+
+        .camera-btn:hover {
+            background: #00a085 !important;
+        }
+
+        .image-upload-container {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .image-upload-container:hover {
+            border-color: #667eea;
+        }
+
+        .image-upload-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .image-upload-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .image-preview {
+            margin-top: 15px;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .image-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .annotate-btn {
+            background: #feca57;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .task-list {
+            margin-bottom: 30px;
+        }
+
+        .task-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .task-priority {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high { background: #ffe0e0; color: #ff6b6b; }
+        .priority-medium { background: #fff4e0; color: #feca57; }
+        .priority-low { background: #e0f4ff; color: #48dbfb; }
+
+        .task-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .task-image {
+            max-width: 100px;
+            max-height: 80px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .task-image:hover {
+            transform: scale(1.05);
+        }
+
+        .annotated-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #feca57;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .compressed-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #48dbfb;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .print-section {
+            background: #f0f8ff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .print-btn {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .print-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .print-preview {
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            max-width: 300px;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        /* Modal styles pour les images */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Camera Modal */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .camera-modal.active {
+            display: flex;
+        }
+
+        .camera-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 90%;
+            text-align: center;
+        }
+
+        .camera-video {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .camera-btn-large {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .camera-btn-large:hover {
+            transform: translateY(-2px);
+        }
+
+        .capture-btn {
+            background: #00b894;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* Annotation Canvas */
+        .annotation-modal {
+            display: none;
+            position: fixed;
+            z-index: 1002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .annotation-modal.active {
+            display: flex;
+        }
+
+        .annotation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 95%;
+            max-height: 95%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .annotation-canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: crosshair;
+            margin-bottom: 15px;
+        }
+
+        .annotation-tools {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tool-btn {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .color-btn {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-btn.active {
+            transform: scale(1.2);
+            border-color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .priority-buttons {
+                justify-content: center;
+            }
+            
+            .task-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 TaskPrint</h1>
+            <p>Gérez et imprimez vos tâches sur votre imprimante thermique</p>
+        </div>
+
+        <div class="task-form">
+            <h2>➕ Ajouter une tâche</h2>
+            <div class="form-group">
+                <label for="taskTitle">Titre de la tâche</label>
+                <input type="text" id="taskTitle" placeholder="Ex: Finaliser le rapport mensuel">
+            </div>
+            
+            <div class="form-group">
+                <label for="taskDescription">Description (optionnelle)</label>
+                <textarea id="taskDescription" placeholder="Détails supplémentaires..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Priorité</label>
+                <div class="priority-buttons">
+                    <button class="priority-btn high" data-priority="high">🔴 Haute</button>
+                    <button class="priority-btn medium active" data-priority="medium">🟡 Moyenne</button>
+                    <button class="priority-btn low" data-priority="low">🟢 Basse</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="taskCategory">Catégorie</label>
+                <select id="taskCategory">
+                    <option value="travail">💼 Travail</option>
+                    <option value="personnel">🏠 Personnel</option>
+                    <option value="urgent">⚡ Urgent</option>
+                    <option value="projet">📈 Projet</option>
+                    <option value="rdv">📅 Rendez-vous</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="taskImage">Photo (optionnelle)</label>
+                <div class="image-upload-container">
+                    <div class="upload-buttons">
+                        <button type="button" class="image-upload-btn" onclick="document.getElementById('taskImage').click()">
+                            📁 Choisir un fichier
+                        </button>
+                        <button type="button" class="image-upload-btn camera-btn" onclick="openCamera()">
+                            📷 Prendre une photo
+                        </button>
+                    </div>
+                    <input type="file" id="taskImage" accept="image/*" style="display: none;">
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+            </div>
+            
+            <button class="add-btn" onclick="addTask()">Ajouter la tâche</button>
+        </div>
+
+        <div class="task-list">
+            <h2>📝 Mes tâches</h2>
+            <div id="taskContainer">
+                <!-- Les tâches apparaîtront ici -->
+            </div>
+        </div>
+
+        <div class="print-section">
+            <h2>🖨️ Impression</h2>
+            <p>Préparez vos tâches pour l'impression thermique</p>
+            
+            <button class="print-btn" onclick="printAllTasks()">Imprimer toutes les tâches</button>
+            <button class="print-btn" onclick="printSelectedTasks()">Imprimer les tâches sélectionnées</button>
+            
+            <div class="print-preview" id="printPreview">
+                <div style="text-align: center; font-weight: bold; margin-bottom: 10px;">
+                    === MES TÂCHES ===<br>
+                    <span id="previewDate"></span>
+                </div>
+                <div id="previewContent">
+                    Aucune tâche à afficher
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    ==================
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal pour la caméra -->
+        <div class="camera-modal" id="cameraModal">
+            <div class="camera-container">
+                <h3>📷 Prendre une photo</h3>
+                <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
+                <canvas id="captureCanvas" style="display: none;"></canvas>
+                <div class="camera-controls">
+                    <button class="camera-btn-large capture-btn" onclick="capturePhoto()">📸 Capturer</button>
+                    <button class="camera-btn-large cancel-btn" onclick="closeCamera()">❌ Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal pour les annotations -->
+        <div class="annotation-modal" id="annotationModal">
+            <div class="annotation-container">
+                <h3>✏️ Annoter l'image</h3>
+                
+                <div class="annotation-tools">
+                    <button class="tool-btn active" data-tool="pen" onclick="selectTool('pen')">✏️ Stylo</button>
+                    <button class="tool-btn" data-tool="arrow" onclick="selectTool('arrow')">↗️ Flèche</button>
+                    <button class="tool-btn" data-tool="rectangle" onclick="selectTool('rectangle')">⬜ Rectangle</button>
+                    <button class="tool-btn" data-tool="circle" onclick="selectTool('circle')">⭕ Cercle</button>
+                    <button class="tool-btn" data-tool="text" onclick="selectTool('text')">🔤 Texte</button>
+                </div>
+
+                <div class="color-picker">
+                    <span style="margin-right: 10px;">Couleur:</span>
+                    <div class="color-btn active" data-color="#ff6b6b" style="background: #ff6b6b;" onclick="selectColor('#ff6b6b')"></div>
+                    <div class="color-btn" data-color="#feca57" style="background: #feca57;" onclick="selectColor('#feca57')"></div>
+                    <div class="color-btn" data-color="#48dbfb" style="background: #48dbfb;" onclick="selectColor('#48dbfb')"></div>
+                    <div class="color-btn" data-color="#ff9ff3" style="background: #ff9ff3;" onclick="selectColor('#ff9ff3')"></div>
+                    <div class="color-btn" data-color="#54a0ff" style="background: #54a0ff;" onclick="selectColor('#54a0ff')"></div>
+                    <div class="color-btn" data-color="#5f27cd" style="background: #5f27cd;" onclick="selectColor('#5f27cd')"></div>
+                    <div class="color-btn" data-color="#00d2d3" style="background: #00d2d3;" onclick="selectColor('#00d2d3')"></div>
+                    <div class="color-btn" data-color="#ff6348" style="background: #ff6348;" onclick="selectColor('#ff6348')"></div>
+                    <div class="color-btn" data-color="#2ed573" style="background: #2ed573;" onclick="selectColor('#2ed573')"></div>
+                    <div class="color-btn" data-color="#333333" style="background: #333333;" onclick="selectColor('#333333')"></div>
+                </div>
+
+                <canvas id="annotationCanvas" class="annotation-canvas"></canvas>
+                
+                <div class="camera-controls">
+                    <button class="camera-btn-large" style="background: #feca57;" onclick="clearAnnotations()">🗑️ Effacer</button>
+                    <button class="camera-btn-large capture-btn" onclick="saveAnnotatedImage()">💾 Sauvegarder</button>
+                    <button class="camera-btn-large cancel-btn" onclick="closeAnnotation()">❌ Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal pour afficher les images en grand -->
+        <div class="image-modal" id="imageModal">
+            <div class="modal-content">
+                <button class="close-modal" onclick="closeImageModal()">×</button>
+                <img id="modalImage" style="max-width: 100%; max-height: 100%; border-radius: 10px;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tasks = [];
+        let selectedPriority = 'medium';
+        let taskIdCounter = 1;
+        let currentTaskImage = null;
+        
+        // Variables pour la caméra
+        let cameraStream = null;
+        
+        // Variables pour l'annotation
+        let annotationCanvas = null;
+        let annotationCtx = null;
+        let isDrawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#ff6b6b';
+        let originalImageForAnnotation = null;
+
+        // Gestion de la sélection de priorité
+        document.querySelectorAll('.priority-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedPriority = this.dataset.priority;
+            });
+        });
+
+        // Gestion de l'upload d'image
+        document.getElementById('taskImage').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleImageFile(file);
+            }
+        });
+
+        function handleImageFile(file) {
+            // Vérifier la taille du fichier (max 10MB avant compression)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('La taille de l\'image ne peut pas dépasser 10MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Compresser l'image automatiquement
+                compressImage(e.target.result, file.name, file.type);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function compressImage(imageSrc, filename, mimeType) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Calculer les nouvelles dimensions (max 800px de largeur)
+                let { width, height } = img;
+                const maxWidth = 800;
+                const maxHeight = 600;
+
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                if (height > maxHeight) {
+                    width = (width * maxHeight) / height;
+                    height = maxHeight;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                // Dessiner l'image redimensionnée
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Convertir en base64 avec compression
+                const compressedData = canvas.toDataURL(mimeType, 0.8); // 80% de qualité
+                
+                // Calculer la réduction de taille
+                const originalSize = imageSrc.length;
+                const compressedSize = compressedData.length;
+                const reduction = Math.round((1 - compressedSize / originalSize) * 100);
+
+                currentTaskImage = {
+                    data: compressedData,
+                    name: filename,
+                    type: mimeType,
+                    compressed: reduction > 5, // Marquer comme compressée si réduction > 5%
+                    originalSize: Math.round(originalSize / 1024), // en KB
+                    compressedSize: Math.round(compressedSize / 1024) // en KB
+                };
+
+                showImagePreview(compressedData, filename, currentTaskImage.compressed);
+            };
+            img.src = imageSrc;
+        }
+
+        function showImagePreview(src, filename, isCompressed = false) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `
+                <div style="position: relative; display: inline-block;">
+                    <img src="${src}" alt="${filename}" class="preview-image">
+                    <button class="remove-image" onclick="removeCurrentImage()">×</button>
+                    ${isCompressed ? '<div class="compressed-badge">Compressée</div>' : ''}
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #666;">${filename}</p>
+                <div class="image-controls">
+                    <button class="control-btn annotate-btn" onclick="openAnnotation()">✏️ Annoter</button>
+                    ${isCompressed ? `<button class="control-btn" onclick="showCompressionInfo()" title="Taille réduite de ${currentTaskImage?.originalSize}KB à ${currentTaskImage?.compressedSize}KB">📊 Info compression</button>` : ''}
+                </div>
+            `;
+        }
+
+        function showCompressionInfo() {
+            if (currentTaskImage && currentTaskImage.compressed) {
+                alert(`📊 Compression réussie !\n\nTaille originale: ${currentTaskImage.originalSize}KB\nTaille compressée: ${currentTaskImage.compressedSize}KB\nÉconomie: ${Math.round((1 - currentTaskImage.compressedSize / currentTaskImage.originalSize) * 100)}%`);
+            }
+        }
+
+        function removeCurrentImage() {
+            currentTaskImage = null;
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('taskImage').value = '';
+        }
+
+        // === FONCTIONNALITÉS CAMÉRA ===
+        
+        async function openCamera() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment', // Caméra arrière par défaut
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                const video = document.getElementById('cameraVideo');
+                video.srcObject = cameraStream;
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                alert('Impossible d\'accéder à la caméra. Veuillez vérifier les permissions.');
+            }
+        }
